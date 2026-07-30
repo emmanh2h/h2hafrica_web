@@ -35,6 +35,58 @@ WordPress (headless, WPGraphQL) + Next.js frontend, built from the Figma design.
 - Header nav, footer sitemap/legal links, and newsletter copy are hardcoded in the frontend
   (not CMS-managed) — they're site chrome, not content that changes often.
 
+## Deploying to production (Plesk)
+
+Target layout: everything under `happy2host.africa` — WordPress at `/cmsadmin`, the Next.js
+frontend at `/main` (temporary; moves to the domain root later — just unset `NEXT_BASE_PATH`
+when that happens). Both run on the same Plesk server, so there's no cross-origin/CORS concern
+between them in production.
+
+### 1. WordPress → `/cmsadmin`
+
+1. In Plesk, create the domain (if not already) and, under its document root, create a
+   `cmsadmin` subdirectory.
+2. Deploy the repo there — either Plesk's Git integration pointed at this GitHub repo (simplest;
+   set the deploy path to `cmsadmin` relative to the webroot), or SFTP.
+3. Create a MySQL database + user in Plesk's Databases section.
+4. Create `wp-config.php` on the server from `wp-config-sample.php` (this file is gitignored —
+   it's never in the repo) with the new DB credentials.
+5. Migrate the database:
+   ```
+   # locally
+   .bin/wp db export h2h-africa.sql --allow-root
+
+   # upload h2h-africa.sql, then on the server (Plesk gives you SSH + phpMyAdmin either works)
+   wp db import h2h-africa.sql
+   wp search-replace 'http://localhost:8888/h2h_africa' 'https://happy2host.africa/cmsadmin' --allow-root
+   ```
+   (Plesk's WordPress Toolkit extension usually ships wp-cli already; if not, install it the same
+   way this project's `.bin/wp` was set up locally.)
+6. Migrate `wp-content/uploads/` via SFTP/rsync — it's gitignored, so it doesn't come over with
+   the code.
+7. In wp-admin → Settings → General, confirm Site Address (URL) is
+   `https://happy2host.africa/cmsadmin`.
+8. Re-flush permalinks (Settings → Permalinks → Save) so pretty URLs and `/graphql` work under
+   the new path.
+
+### 2. Frontend → `/main`
+
+1. In Plesk, add a Node.js application for the domain, rooted at the `main` subdirectory, with
+   this repo's `frontend/` deployed there (Plesk Git integration again, or SFTP).
+2. Copy `frontend/.env.production.example` to `.env.production` on the server and fill in the
+   real values (already set for `/cmsadmin` + `/main` — just confirm they match).
+3. `npm install && npm run build`, then let Plesk's Passenger process manager start it
+   (`npm run start` / `next start`).
+4. Point Plesk's Node.js app settings at port/startup as required by its Node.js extension.
+
+### 3. Verify
+
+- `https://happy2host.africa/main` loads the site
+- `https://happy2host.africa/cmsadmin/wp-admin` logs into WordPress
+- `https://happy2host.africa/cmsadmin/graphql` responds to a GraphQL query
+- Images (WP media) render on the frontend (confirms the `remotePatterns` entry for the prod
+  domain in `next.config.ts` is correct)
+
 ## Known follow-ups
 
 - `/privacy-policy`, `/cookie-policy`, `/terms-of-use`, `/accessibility` are linked from the
