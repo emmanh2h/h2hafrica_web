@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+:root {
+  --color-white: #ffffff;
+  --color-ink: #171719;
+  --color-mint: #f1f6f2;
+  --color-green: #007749;
+  --color-gold: #d9a617;
+}
+
+@theme inline {
+  --color-white: var(--color-white);
+  --color-ink: var(--color-ink);
+  --color-mint: var(--color-mint);
+  --color-green: var(--color-green);
+  --color-gold: var(--color-gold);
+  --font-sans: var(--font-figtree);
+}
+
+body {
+  background: var(--color-white);
+  color: var(--color-ink);
+}

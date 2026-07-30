@@ -1,0 +1,25 @@
+# WordPress environment / credentials — never commit
+/wp-config.php
+/.htaccess
+/.bin/
+
+# User-uploaded media — not code, migrate separately per-environment
+/wp-content/uploads/
+
+# WordPress runtime
+/wp-content/debug.log
+/wp-content/cache/
+/wp-content/upgrade/
+
+# Frontend (Next.js)
+/frontend/node_modules/
+/frontend/.next/
+/frontend/out/
+/frontend/build/
+/frontend/.env*
+/frontend/*.tsbuildinfo
+/frontend/next-env.d.ts
+/frontend/.vercel
+
+# OS
+.DS_Store
