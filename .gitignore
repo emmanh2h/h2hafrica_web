@@ -6,6 +6,9 @@
 # User-uploaded media — not code, migrate separately per-environment
 /wp-content/uploads/
 
+# Database dumps — transfer artifacts, not code
+*.sql
+
 # WordPress runtime
 /wp-content/debug.log
 /wp-content/cache/
